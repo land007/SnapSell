@@ -37,6 +37,6 @@ jobs:
       run: tcb login --apiKeyId ${{ secrets.TCB_SECRET_ID }} --apiKey ${{ secrets.TCB_SECRET_KEY }}
 
     - name: Deploy to CloudBase Static Hosting
-      run: tcb hosting deploy ./.next /snapsell -e ${{ secrets.TCB_ENV_ID }}
-      # 注意：Next.js 构建输出在 .next 目录
-      # /snapsell 是部署到云端的路径，可以改成 / 部署到根目录
+      run: tcb hosting deploy ./out / -e ${{ secrets.TCB_ENV_ID }}
+      # Next.js 静态导出会生成 out 目录
+      # 部署到根目录 / 而不是 /snapsell
