@@ -184,7 +184,6 @@ export default function ProductForm({ onUpdate }: ProductFormProps) {
                                 className="hidden"
                                 onChange={handleImageUpload}
                                 disabled={isUploading}
-                                capture="environment"
                             />
                         </label>
                     )}

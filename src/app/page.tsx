@@ -31,12 +31,37 @@ export default function Home() {
 
     setIsGenerating(true);
     try {
-      const dataUrl = await toPng(cardRef.current, { cacheBust: true, pixelRatio: 3 });
+      // 等待所有图片加载完成
+      const images = cardRef.current.querySelectorAll('img');
+      await Promise.all(
+        Array.from(images).map((img) => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            // 超时保护
+            setTimeout(resolve, 3000);
+          });
+        })
+      );
+
+      console.log('Starting image generation...');
+
+      // 使用更好的选项生成图片
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        skipFonts: false,
+        includeQueryParams: false,
+        backgroundColor: '#ffffff'
+      });
+
+      console.log('Image generated successfully');
       setGeneratedImage(dataUrl);
       setShowImageModal(true);
     } catch (err) {
-      console.error('Failed to generate image', err);
-      alert('生成图片失败，请重试');
+      console.error('Failed to generate image:', err);
+      alert('生成图片失败，请重试\n\n提示：如果问题持续，请尝试重新上传图片');
     } finally {
       setIsGenerating(false);
     }

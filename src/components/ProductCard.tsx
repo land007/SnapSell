@@ -29,7 +29,16 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data }, ref)
             {/* Main Image Area */}
             <div className="relative w-full h-[55%] bg-gray-100 flex items-center justify-center overflow-hidden">
                 {image ? (
-                    <img src={image} alt={title} className="w-full h-full object-cover" />
+                    <img
+                        src={image}
+                        alt={title}
+                        className="w-full h-full object-cover"
+                        crossOrigin="anonymous"
+                        onError={(e) => {
+                            console.error('ProductCard image load error');
+                            e.currentTarget.style.display = 'none';
+                        }}
+                    />
                 ) : (
                     <div className="text-gray-400 flex flex-col items-center">
                         <span className="text-4xl mb-2">📷</span>
