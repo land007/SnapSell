@@ -22,6 +22,8 @@ export default function ProductForm({ onUpdate }: ProductFormProps) {
         image: null as string | null,
     });
 
+    const [isUploading, setIsUploading] = useState(false);
+
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         const newData = { ...formData, [name]: value };
@@ -33,71 +35,96 @@ export default function ProductForm({ onUpdate }: ProductFormProps) {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // 检查文件类型
-        if (!file.type.startsWith('image/')) {
-            alert('请选择图片文件');
-            return;
-        }
+        console.log('File selected:', file.name, file.type, file.size);
 
-        // 检查文件大小（限制 10MB）
-        if (file.size > 10 * 1024 * 1024) {
-            alert('图片文件过大，请选择小于 10MB 的图片');
-            return;
-        }
+        setIsUploading(true);
 
         try {
-            // 使用 Canvas 压缩和转换图片
-            const img = new Image();
             const reader = new FileReader();
 
             reader.onload = (event) => {
-                if (!event.target?.result) return;
+                const dataUrl = event.target?.result as string;
+                if (!dataUrl) {
+                    alert('图片读取失败');
+                    setIsUploading(false);
+                    return;
+                }
+
+                console.log('Image loaded, length:', dataUrl.length);
+
+                // 创建图片对象进行压缩
+                const img = new Image();
 
                 img.onload = () => {
-                    // 创建 canvas 进行压缩
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    if (!ctx) return;
+                    try {
+                        console.log('Image dimensions:', img.width, 'x', img.height);
 
-                    // 计算缩放比例（最大宽度 1200px）
-                    const maxWidth = 1200;
-                    let width = img.width;
-                    let height = img.height;
+                        // 创建 canvas
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
 
-                    if (width > maxWidth) {
-                        height = (height * maxWidth) / width;
-                        width = maxWidth;
+                        if (!ctx) {
+                            // Canvas 失败，使用原图
+                            const newData = { ...formData, image: dataUrl };
+                            setFormData(newData);
+                            onUpdate(newData);
+                            setIsUploading(false);
+                            return;
+                        }
+
+                        // 计算缩放
+                        const maxWidth = 1200;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        // 绘制并压缩
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressed = canvas.toDataURL('image/jpeg', 0.85);
+
+                        console.log('Compressed, new length:', compressed.length);
+
+                        const newData = { ...formData, image: compressed };
+                        setFormData(newData);
+                        onUpdate(newData);
+                        setIsUploading(false);
+                    } catch (error) {
+                        console.error('Compression error:', error);
+                        // 压缩失败，使用原图
+                        const newData = { ...formData, image: dataUrl };
+                        setFormData(newData);
+                        onUpdate(newData);
+                        setIsUploading(false);
                     }
-
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    // 绘制图片
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // 转换为 base64（JPEG 格式，质量 0.8）
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-
-                    const newData = { ...formData, image: compressedDataUrl };
-                    setFormData(newData);
-                    onUpdate(newData);
                 };
 
                 img.onerror = () => {
-                    alert('图片加载失败，请重试');
+                    console.error('Image load failed');
+                    alert('图片格式不支持，请尝试其他图片');
+                    setIsUploading(false);
                 };
 
-                img.src = event.target.result as string;
+                img.src = dataUrl;
             };
 
             reader.onerror = () => {
+                console.error('FileReader error');
                 alert('图片读取失败，请重试');
+                setIsUploading(false);
             };
 
             reader.readAsDataURL(file);
         } catch (error) {
-            console.error('Image upload error:', error);
+            console.error('Upload error:', error);
             alert('图片上传失败，请重试');
+            setIsUploading(false);
         }
     };
 
@@ -105,7 +132,6 @@ export default function ProductForm({ onUpdate }: ProductFormProps) {
         const newData = { ...formData, image: null };
         setFormData(newData);
         onUpdate(newData);
-        // 重置 file input
         const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
     };
@@ -120,7 +146,15 @@ export default function ProductForm({ onUpdate }: ProductFormProps) {
                 <div className="relative">
                     {formData.image ? (
                         <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border group">
-                            <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                            <img
+                                src={formData.image}
+                                alt="Preview"
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    console.error('Image display error');
+                                    e.currentTarget.style.display = 'none';
+                                }}
+                            />
                             <button
                                 onClick={removeImage}
                                 className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -131,15 +165,26 @@ export default function ProductForm({ onUpdate }: ProductFormProps) {
                     ) : (
                         <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Upload className="w-8 h-8 mb-3 text-muted-foreground" />
-                                <p className="text-sm text-muted-foreground">点击上传图片</p>
-                                <p className="text-xs text-muted-foreground mt-1">支持 JPG、PNG、HEIC 等格式</p>
+                                {isUploading ? (
+                                    <>
+                                        <div className="w-8 h-8 mb-3 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                        <p className="text-sm text-muted-foreground">正在处理图片...</p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Upload className="w-8 h-8 mb-3 text-muted-foreground" />
+                                        <p className="text-sm text-muted-foreground">点击上传图片</p>
+                                        <p className="text-xs text-muted-foreground mt-1">支持 JPG、PNG、HEIC 等格式</p>
+                                    </>
+                                )}
                             </div>
                             <input
                                 type="file"
-                                accept="image/*,image/heic,image/heif"
+                                accept="image/*"
                                 className="hidden"
                                 onChange={handleImageUpload}
+                                disabled={isUploading}
+                                capture="environment"
                             />
                         </label>
                     )}
@@ -164,7 +209,7 @@ export default function ProductForm({ onUpdate }: ProductFormProps) {
             <div className="space-y-2">
                 <label htmlFor="price" className="block text-sm font-medium text-muted-foreground">价格 (元)</label>
                 <input
-                    type="text" // Keep as text to allow flexible input like "100包邮" if needed, or restrict to number
+                    type="text"
                     id="price"
                     name="price"
                     value={formData.price}
