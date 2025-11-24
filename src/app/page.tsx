@@ -17,6 +17,8 @@ export default function Home() {
 
   const cardRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const handleUpdate = (data: ProductData) => {
     setProductData(data);
@@ -30,16 +32,22 @@ export default function Home() {
     setIsGenerating(true);
     try {
       const dataUrl = await toPng(cardRef.current, { cacheBust: true, pixelRatio: 3 });
-      const link = document.createElement('a');
-      link.download = `snapsell-${Date.now()}.png`;
-      link.href = dataUrl;
-      link.click();
+      setGeneratedImage(dataUrl);
+      setShowImageModal(true);
     } catch (err) {
       console.error('Failed to generate image', err);
       alert('生成图片失败，请重试');
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleDownload = () => {
+    if (!generatedImage) return;
+    const link = document.createElement('a');
+    link.download = `snapsell-${Date.now()}.png`;
+    link.href = generatedImage;
+    link.click();
   };
 
   return (
@@ -98,26 +106,88 @@ export default function Home() {
                   ) : (
                     <>
                       <Download size={20} />
-                      <span>生成并保存图片</span>
+                      <span>生成分享图片</span>
                     </>
                   )}
                 </button>
-                {/* 
-                <button className="flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground py-3 px-6 rounded-xl font-medium transition-all">
-                  <Share2 size={20} />
-                  <span>复制</span>
-                </button> 
-                */}
               </div>
 
               <p className="text-center text-xs text-muted-foreground">
-                提示：生成后长按图片即可发送给好友
+                💡 提示：生成后长按图片可直接分享到微信
               </p>
             </div>
           </div>
 
         </div>
       </main>
+
+      {/* Image Preview Modal for WeChat Sharing */}
+      {showImageModal && generatedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setShowImageModal(false)}
+        >
+          <div className="relative max-w-md w-full">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Image Container */}
+            <div className="bg-white rounded-lg overflow-hidden shadow-2xl">
+              <img
+                src={generatedImage}
+                alt="Generated Product"
+                className="w-full h-auto"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+
+            {/* Instructions */}
+            <div className="mt-4 bg-white/10 backdrop-blur-md rounded-lg p-4 text-white space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">
+                  1
+                </div>
+                <div>
+                  <p className="font-semibold">微信内分享</p>
+                  <p className="text-sm text-gray-300">长按图片 → 选择"发送给朋友"</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                  2
+                </div>
+                <div>
+                  <p className="font-semibold">保存到相册</p>
+                  <p className="text-sm text-gray-300">长按图片 → 选择"保存图片"</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                  3
+                </div>
+                <div>
+                  <p className="font-semibold">电脑端下载</p>
+                  <button
+                    onClick={handleDownload}
+                    className="text-sm text-blue-300 hover:text-blue-200 underline"
+                  >
+                    点击下载到本地
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-border py-8 mt-auto">
