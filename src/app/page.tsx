@@ -30,31 +30,50 @@ export default function Home() {
     }
 
     setIsGenerating(true);
-    try {
-      // 等待所有图片加载完成
-      const images = cardRef.current.querySelectorAll('img');
-      await Promise.all(
-        Array.from(images).map((img) => {
-          if (img.complete) return Promise.resolve();
-          return new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-            // 超时保护
-            setTimeout(resolve, 3000);
-          });
-        })
-      );
+    let cleanupImages: (() => void) | null = null;
 
+    try {
       console.log('Starting image generation...');
 
-      // 使用更好的选项生成图片
-      const dataUrl = await toPng(cardRef.current, {
+      // 1. Preload images to handle CORS
+      // This fetches images as blobs and creates local object URLs
+      const { preloadImages, isIOS } = await import('@/utils/imageUtils');
+      cleanupImages = await preloadImages(cardRef.current);
+
+      // 2. Determine settings based on device
+      const iOS = isIOS();
+      const isMobile = iOS || window.innerWidth < 768;
+      const pixelRatio = isMobile ? 2 : 3; // Reduce ratio on mobile to save memory
+
+      // 3. Generate image
+      // Safari needs a moment to render the new blob URLs
+      await new Promise(resolve => setTimeout(resolve, iOS ? 300 : 100));
+
+      const options = {
         cacheBust: true,
-        pixelRatio: 2,
+        pixelRatio: pixelRatio,
         skipFonts: false,
         includeQueryParams: false,
-        backgroundColor: '#ffffff'
-      });
+        backgroundColor: '#ffffff',
+        style: {
+          transform: 'scale(1)',
+        }
+      };
+
+      // iOS Safari Fix: Double render
+      // The first render often fails to paint the images (gray background).
+      // We run a "warm-up" render to force the browser to paint.
+      if (iOS) {
+        console.log('Performing warm-up render for iOS...');
+        try {
+          await toPng(cardRef.current, options);
+          await new Promise(resolve => setTimeout(resolve, 300)); // Wait for paint
+        } catch (e) {
+          console.warn('Warm-up render failed, continuing...', e);
+        }
+      }
+
+      const dataUrl = await toPng(cardRef.current, options);
 
       console.log('Image generated successfully');
       setGeneratedImage(dataUrl);
@@ -63,6 +82,9 @@ export default function Home() {
       console.error('Failed to generate image:', err);
       alert('生成图片失败，请重试\n\n提示：如果问题持续，请尝试重新上传图片');
     } finally {
+      if (cleanupImages) {
+        cleanupImages();
+      }
       setIsGenerating(false);
     }
   };
