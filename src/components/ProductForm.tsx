@@ -29,17 +29,75 @@ export default function ProductForm({ onUpdate }: ProductFormProps) {
         onUpdate(newData);
     };
 
-    const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
+        if (!file) return;
+
+        // 检查文件类型
+        if (!file.type.startsWith('image/')) {
+            alert('请选择图片文件');
+            return;
+        }
+
+        // 检查文件大小（限制 10MB）
+        if (file.size > 10 * 1024 * 1024) {
+            alert('图片文件过大，请选择小于 10MB 的图片');
+            return;
+        }
+
+        try {
+            // 使用 Canvas 压缩和转换图片
+            const img = new Image();
             const reader = new FileReader();
-            reader.onloadend = () => {
-                const result = reader.result as string;
-                const newData = { ...formData, image: result };
-                setFormData(newData);
-                onUpdate(newData);
+
+            reader.onload = (event) => {
+                if (!event.target?.result) return;
+
+                img.onload = () => {
+                    // 创建 canvas 进行压缩
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return;
+
+                    // 计算缩放比例（最大宽度 1200px）
+                    const maxWidth = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    // 绘制图片
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // 转换为 base64（JPEG 格式，质量 0.8）
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                    const newData = { ...formData, image: compressedDataUrl };
+                    setFormData(newData);
+                    onUpdate(newData);
+                };
+
+                img.onerror = () => {
+                    alert('图片加载失败，请重试');
+                };
+
+                img.src = event.target.result as string;
             };
+
+            reader.onerror = () => {
+                alert('图片读取失败，请重试');
+            };
+
             reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('Image upload error:', error);
+            alert('图片上传失败，请重试');
         }
     };
 
@@ -47,6 +105,9 @@ export default function ProductForm({ onUpdate }: ProductFormProps) {
         const newData = { ...formData, image: null };
         setFormData(newData);
         onUpdate(newData);
+        // 重置 file input
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
     };
 
     return (
@@ -72,8 +133,14 @@ export default function ProductForm({ onUpdate }: ProductFormProps) {
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                 <Upload className="w-8 h-8 mb-3 text-muted-foreground" />
                                 <p className="text-sm text-muted-foreground">点击上传图片</p>
+                                <p className="text-xs text-muted-foreground mt-1">支持 JPG、PNG、HEIC 等格式</p>
                             </div>
-                            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                            <input
+                                type="file"
+                                accept="image/*,image/heic,image/heif"
+                                className="hidden"
+                                onChange={handleImageUpload}
+                            />
                         </label>
                     )}
                 </div>
