@@ -17,7 +17,7 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data }, ref)
     return (
         <div
             ref={ref}
-            className="w-[375px] bg-white text-black overflow-hidden shadow-2xl relative flex flex-col"
+            className="w-[375px] bg-card text-card-foreground overflow-hidden shadow-2xl relative flex flex-col"
             style={{ aspectRatio: '3/4' }} // Standard mobile ratio for sharing
         >
             {/* Header / Branding */}
@@ -27,7 +27,7 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data }, ref)
             </div>
 
             {/* Main Image Area */}
-            <div className="relative w-full h-[55%] bg-gray-100 flex items-center justify-center overflow-hidden">
+            <div className="relative w-full h-[55%] bg-muted flex items-center justify-center overflow-hidden">
                 {image ? (
                     <img
                         src={image}
@@ -56,28 +56,28 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data }, ref)
             </div>
 
             {/* Content Area */}
-            <div className="p-5 flex-1 flex flex-col bg-white">
-                <h1 className="text-2xl font-bold text-gray-900 leading-tight mb-3 line-clamp-2">
+            <div className="p-5 flex-1 flex flex-col bg-card">
+                <h1 className="text-2xl font-bold text-card-foreground leading-tight mb-3 line-clamp-2">
                     {title || "商品名称"}
                 </h1>
 
-                <p className="text-gray-600 text-sm leading-relaxed line-clamp-4 flex-1">
+                <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4 flex-1">
                     {description || "这里显示商品描述..."}
                 </p>
 
                 {/* Footer / QR Placeholder */}
-                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground">
                             头像
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted-foreground">
                             <p>卖家发布</p>
                             <p>扫码联系我</p>
                         </div>
                     </div>
                     {/* Placeholder for user QR or mini-program code */}
-                    <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                    <div className="w-12 h-12 bg-muted rounded-lg"></div>
                 </div>
             </div>
         </div>

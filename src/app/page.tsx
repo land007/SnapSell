@@ -6,6 +6,7 @@ import { Download } from 'lucide-react';
 import ProductForm, { ProductData } from '@/components/ProductForm';
 import ProductCard from '@/components/ProductCard';
 import AdSlot from '@/components/AdSlot';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Home() {
   const [productData, setProductData] = useState<ProductData>({
@@ -108,8 +109,11 @@ export default function Home() {
             </div>
             <h1 className="font-bold text-xl tracking-tight">SnapSell</h1>
           </div>
-          <div className="text-sm text-muted-foreground hidden sm:block">
-            社区闲置好物生成器
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted-foreground hidden sm:block">
+              社区闲置好物生成器
+            </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>
