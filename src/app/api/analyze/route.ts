@@ -37,7 +37,12 @@ export async function POST(req: NextRequest) {
         // REAL MODE: Google Gemini
         try {
             const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+            const model = genAI.getGenerativeModel({
+                model: "gemini-1.5-flash",
+                generationConfig: {
+                    temperature: 0.7,
+                }
+            });
 
             // Remove header from base64 string (data:image/jpeg;base64,...)
             const base64Data = image.split(',')[1];
