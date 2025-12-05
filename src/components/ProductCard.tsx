@@ -45,7 +45,7 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data, commun
                 ) : (
                     <div className="text-gray-400 flex flex-col items-center">
                         <span className="text-4xl mb-2">📷</span>
-                        <span className="text-sm">商品图片预览</span>
+                        <span className="text-sm">好物图片预览</span>
                     </div>
                 )}
 
@@ -61,11 +61,11 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data, commun
             {/* Content Area */}
             <div className="p-5 flex-1 flex flex-col bg-card">
                 <h1 className="text-2xl font-bold text-card-foreground leading-tight mb-3 line-clamp-2">
-                    {title || "商品名称"}
+                    {title || "好物名称"}
                 </h1>
 
                 <p className="text-muted-foreground text-sm leading-relaxed line-clamp-[8] flex-1">
-                    {description || "这里显示商品描述..."}
+                    {description || "这里显示好物描述..."}
                 </p>
             </div>
         </div>

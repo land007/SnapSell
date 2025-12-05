@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "SnapSell - 闲置好物生成器",
-  description: "快速生成精美的闲置商品图片，方便社群分享。",
+  description: "快速生成精美的闲置好物图片，方便社群分享。",
 };
 
 export default function RootLayout({

@@ -28,7 +28,6 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
 
     const [isUploading, setIsUploading] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [smartText, setSmartText] = useState('');
     const [showLoadingAd, setShowLoadingAd] = useState(false);
     const [visitorId, setVisitorId] = useState<string>('');
     const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
@@ -98,24 +97,7 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
         }
     };
 
-    // Smart Paste Handler
-    const handleSmartPaste = async () => {
-        if (!smartText.trim()) return;
 
-        const { parseProductInfo } = await import('@/utils/textParser');
-        const info = parseProductInfo(smartText);
-
-        const newData = {
-            ...formData,
-            title: info.title || formData.title,
-            price: info.price || formData.price,
-            description: info.description || formData.description,
-        };
-
-        setFormData(newData);
-        onUpdate(newData);
-        setSmartText(''); // Clear after paste
-    };
 
     // Clipboard Image Paste
     React.useEffect(() => {
@@ -236,7 +218,7 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
             />
 
             <div className="space-y-6 p-6 bg-card border border-border rounded-xl shadow-sm">
-                <h2 className="text-xl font-semibold mb-4">填写商品信息</h2>
+                <h2 className="text-xl font-semibold mb-4">填写好物信息</h2>
 
                 {/* Image Upload */}
                 <div className="space-y-2">
@@ -273,7 +255,7 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
                                     {isAnalyzing ? (
                                         <>
                                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            <span>AI 正在识别商品...</span>
+                                            <span>AI 正在识别好物...</span>
                                         </>
                                     ) : (
                                         <>
@@ -310,31 +292,11 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
                     </div>
                 </div>
 
-                {/* Smart Paste Section (Collapsed/Secondary) */}
-                <div className="bg-secondary/20 p-4 rounded-lg border border-border/50 space-y-2">
-                    <label className="text-sm font-medium text-primary flex items-center gap-2">
-                        📝 粘贴文本识别 (可选)
-                    </label>
-                    <div className="flex gap-2">
-                        <textarea
-                            value={smartText}
-                            onChange={(e) => setSmartText(e.target.value)}
-                            placeholder="如果没有图片，也可以粘贴文字描述..."
-                            className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none h-12 focus:h-24 transition-all"
-                        />
-                        <button
-                            onClick={handleSmartPaste}
-                            disabled={!smartText}
-                            className="px-4 py-2 bg-secondary text-secondary-foreground text-sm font-medium rounded-lg hover:bg-secondary/80 disabled:opacity-50 transition-colors h-auto"
-                        >
-                            识别
-                        </button>
-                    </div>
-                </div>
+
 
                 {/* Title */}
                 <div className="space-y-2">
-                    <label htmlFor="title" className="block text-sm font-medium text-muted-foreground">商品名称</label>
+                    <label htmlFor="title" className="block text-sm font-medium text-muted-foreground">好物名称</label>
                     <input
                         type="text"
                         id="title"
@@ -362,7 +324,7 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
 
                 {/* Description */}
                 <div className="space-y-2">
-                    <label htmlFor="description" className="block text-sm font-medium text-muted-foreground">商品描述</label>
+                    <label htmlFor="description" className="block text-sm font-medium text-muted-foreground">好物描述</label>
 
                     {/* Quick Tags */}
                     <div className="flex flex-wrap gap-2 mb-2">
@@ -383,7 +345,7 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
                         value={formData.description}
                         onChange={handleChange}
                         rows={4}
-                        placeholder="描述一下商品的成色、入手渠道、转手原因等..."
+                        placeholder="描述一下好物的成色、入手渠道、转手原因等..."
                         className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
                     />
                 </div>

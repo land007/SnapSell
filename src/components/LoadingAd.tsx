@@ -114,7 +114,7 @@ export default function LoadingAd({
                         <div className="relative">
                             <Loader2 className="w-5 h-5 text-violet-600 animate-spin" />
                         </div>
-                        <span className="font-medium text-sm text-gray-700">AI 正在识别商品...</span>
+                        <span className="font-medium text-sm text-gray-700">AI 正在识别好物...</span>
                     </div>
                     {/* In expanded mode, we might not want to allow closing if it's "loading",
                         but if we do, we can uncomment this. For now, let's keep it non-closable during load

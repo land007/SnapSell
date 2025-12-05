@@ -189,7 +189,7 @@ export default function RentAdModal({ isOpen, onClose, onPublish }: RentAdModalP
                         {step === 'success' ? '🎉 提交成功' : '📢 广告位招租'}
                     </h2>
                     <p className="text-white/80 text-sm mt-1">
-                        {step === 'form' && '填写广告信息，让更多人看到您的商品'}
+                        {step === 'form' && '填写广告信息，让更多人看到您的好物'}
                         {step === 'payment' && '联系管理员缴费，审核后上线'}
                         {step === 'success' && '您的广告已提交，等待管理员开通'}
                     </p>
