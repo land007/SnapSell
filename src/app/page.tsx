@@ -162,10 +162,11 @@ function HomeContent() {
 
           {/* Left Column: Form & Ad (Desktop: 7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            <AdCarousel
+            {/* AdCarousel temporarily hidden */}
+            {/* <AdCarousel
               initialAd={headerAd.isActive ? headerAd : undefined}
               communityName={communityName || undefined}
-            />
+            /> */}
             <ProductForm
               initialData={productData}
               onUpdate={handleUpdate}

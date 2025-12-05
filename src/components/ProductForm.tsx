@@ -212,11 +212,12 @@ export default function ProductForm({ initialData, onUpdate, loadingAdConfig, on
 
     return (
         <>
-            <LoadingAd
+            {/* LoadingAd temporarily hidden */}
+            {/* <LoadingAd
                 isOpen={showLoadingAd}
                 {...loadingAdConfig}
-                onClose={() => setShowLoadingAd(false)} // Allow manual close
-            />
+                onClose={() => setShowLoadingAd(false)}
+            /> */}
 
             <div className="space-y-6 p-6 bg-card border border-border rounded-xl shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">填写好物信息</h2>
