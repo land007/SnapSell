@@ -116,10 +116,10 @@ export default function RentAdModal({ isOpen, onClose, onPublish }: RentAdModalP
         setIsProcessing(false);
         setStep('success');
 
-        // Auto publish after success
+        // Auto publish after success (pending approval)
         setTimeout(() => {
             onPublish({
-                isActive: true,
+                isActive: false, // Pending admin approval
                 advertiser: formData.advertiser,
                 offer: formData.offer,
                 qrContent: formData.link || 'https://example.com', // Use link as QR content

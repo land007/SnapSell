@@ -36,8 +36,9 @@ export default function AdCarousel({ initialAd, communityName = 'default' }: AdC
         contact: "点击此处投放广告"
     };
 
-    // Filter out expired ads
+    // Filter out expired and inactive (pending approval) ads
     const validAds = ads.filter(ad => {
+        if (!ad.isActive) return false; // Only show approved ads
         if (!ad.expiresAt) return true; // Permanent ads
         return ad.expiresAt > Date.now();
     });
