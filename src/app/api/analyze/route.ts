@@ -8,6 +8,8 @@ interface AnalyzeResponse {
     price: string;
     description: string;
     tags: string[];
+    address?: string;
+    phone?: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -31,7 +33,9 @@ export async function POST(req: NextRequest) {
                 title: "【转手】99新 苹果 iPhone 14 Pro 暗紫色",
                 price: "5200",
                 description: "自用一手，国行正品。电池健康 95%，一直贴膜带壳使用，无划痕无磕碰。原盒配件齐全，因换新机闲置转让。优先面交，爽快包邮。",
-                tags: ["99新", "电池耐用", "箱说全", "个人自用"]
+                tags: ["99新", "电池耐用", "箱说全", "个人自用"],
+                address: "北京市海淀区中关村大街1号",
+                phone: "13800138000"
             });
         }
 
@@ -57,7 +61,9 @@ export async function POST(req: NextRequest) {
           "title": "A concise, attractive title (in Chinese, e.g. '99新 iPhone 14 Pro')",
           "price": "A estimated price number in CNY (just the number, e.g. '4500')",
           "description": "A friendly, detailed description (in Chinese) mentioning condition, color, and likely accessories.",
-          "tags": ["tag1", "tag2", "tag3", "tag4"]
+          "tags": ["tag1", "tag2", "tag3", "tag4"],
+          "address": "Extract address from image if visible, otherwise null",
+          "phone": "Extract phone number from image if visible, otherwise null"
         }
       `;
 

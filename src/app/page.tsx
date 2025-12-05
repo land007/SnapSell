@@ -5,8 +5,34 @@ import { toPng } from 'html-to-image';
 import { Download } from 'lucide-react';
 import ProductForm, { ProductData } from '@/components/ProductForm';
 import ProductCard from '@/components/ProductCard';
-import AdSlot from '@/components/AdSlot';
+import { AdData } from '@/components/AdSlot';
+import AdCarousel from '@/components/AdCarousel';
 import ThemeToggle from '@/components/ThemeToggle';
+
+// Mock Data
+const DEFAULT_AD: AdData = {
+  isActive: false,
+  advertiser: "老王水果店",
+  offer: "凭此码到店享 8.8 折优惠",
+  qrContent: "COUPON:FRUIT_88_OFF",
+  contact: "联系管理员投放广告: 138-xxxx-xxxx"
+};
+
+const NIKE_AD_CONFIG = {
+  type: 'image' as const,
+  src: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop',
+  link: 'https://example.com',
+  advertiser: '耐克官方旗舰店',
+  description: '极致舒适，动感十足。限时特惠，点击查看详情。'
+};
+
+const NIKE_AD_HEADER: AdData = {
+  isActive: true,
+  advertiser: '耐克官方旗舰店',
+  offer: '极致舒适，动感十足。限时特惠，点击查看详情。',
+  qrContent: 'https://example.com',
+  contact: ''
+};
 
 export default function Home() {
   const [productData, setProductData] = useState<ProductData>({
@@ -16,6 +42,8 @@ export default function Home() {
     image: null,
   });
 
+  const [headerAd, setHeaderAd] = useState<AdData>(DEFAULT_AD);
+
   const cardRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
@@ -23,6 +51,10 @@ export default function Home() {
 
   const handleUpdate = (data: ProductData) => {
     setProductData(data);
+  };
+
+  const handleAdComplete = () => {
+    setHeaderAd(NIKE_AD_HEADER);
   };
 
   const handleGenerate = async () => {
@@ -124,8 +156,12 @@ export default function Home() {
 
           {/* Left Column: Form & Ad (Desktop: 7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            <AdSlot />
-            <ProductForm onUpdate={handleUpdate} />
+            <AdCarousel initialAd={headerAd.isActive ? headerAd : undefined} />
+            <ProductForm
+              onUpdate={handleUpdate}
+              loadingAdConfig={NIKE_AD_CONFIG}
+              onAdComplete={handleAdComplete}
+            />
           </div>
 
           {/* Right Column: Preview & Actions (Desktop: 5 cols) */}
