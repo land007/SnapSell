@@ -70,7 +70,7 @@ export default function ProductForm({ initialData, onUpdate, loadingAdConfig, on
 
             if (!response.ok) {
                 if (response.status === 429) {
-                    alert(data.error || '次数已用完');
+                    alert('😢 AI 可用次数已用完\n\n您今日的免费 AI 识别次数已达上限。\n请明天再来，或联系管理员获取更多次数。');
                     setRemainingTokens(0);
                     return;
                 }
