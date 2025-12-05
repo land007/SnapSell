@@ -1,51 +1,59 @@
 import { useState, useEffect } from 'react';
 import { AdData } from '@/components/AdSlot';
 
-const STORAGE_KEY = 'snapsell_ads';
-
 export const useAdStore = (communityId: string = 'default') => {
     const [ads, setAds] = useState<AdData[]>([]);
-    const storageKey = `snapsell_ads_${communityId}`;
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Load from localStorage on mount or when communityId changes
+    // Load from API on mount or when communityId changes
     useEffect(() => {
-        const stored = localStorage.getItem(storageKey);
-        if (stored) {
+        const fetchAds = async () => {
+            setIsLoading(true);
             try {
-                setAds(JSON.parse(stored));
-            } catch (e) {
-                console.error('Failed to parse ads', e);
-                setAds([]);
+                const res = await fetch(`/api/ads?community=${communityId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setAds(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch ads:', error);
+            } finally {
+                setIsLoading(false);
             }
-        } else {
-            setAds([]);
+        };
+
+        fetchAds();
+    }, [communityId]);
+
+    const saveAds = async (newAds: AdData[]) => {
+        setAds(newAds); // Optimistic update
+        try {
+            await fetch('/api/ads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ community: communityId, ads: newAds }),
+            });
+        } catch (error) {
+            console.error('Failed to save ads:', error);
+            // Revert on error? For now, keep optimistic.
         }
-    }, [communityId, storageKey]);
+    };
 
     const addAd = (ad: AdData) => {
-        setAds(prev => {
-            const newAds = [ad, ...prev];
-            localStorage.setItem(storageKey, JSON.stringify(newAds));
-            return newAds;
-        });
+        const newAds = [ad, ...ads];
+        saveAds(newAds);
     };
 
     const removeAd = (index: number) => {
-        setAds(prev => {
-            const newAds = prev.filter((_, i) => i !== index);
-            localStorage.setItem(storageKey, JSON.stringify(newAds));
-            return newAds;
-        });
+        const newAds = ads.filter((_, i) => i !== index);
+        saveAds(newAds);
     };
 
     const updateAd = (index: number, updatedAd: AdData) => {
-        setAds(prev => {
-            const newAds = [...prev];
-            newAds[index] = updatedAd;
-            localStorage.setItem(storageKey, JSON.stringify(newAds));
-            return newAds;
-        });
+        const newAds = [...ads];
+        newAds[index] = updatedAd;
+        saveAds(newAds);
     };
 
-    return { ads, addAd, removeAd, updateAd };
+    return { ads, addAd, removeAd, updateAd, isLoading };
 };

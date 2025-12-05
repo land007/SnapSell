@@ -15,29 +15,22 @@ export default function AdminPage() {
     const [selectedCommunity, setSelectedCommunity] = useState('default');
     const [newCommunityName, setNewCommunityName] = useState('');
 
-    // Ad Management
-    const { ads, addAd, removeAd, updateAd } = useAdStore(selectedCommunity);
+    // Use the store (which now fetches from API)
+    const { ads, updateAd, removeAd, addAd } = useAdStore(selectedCommunity);
     const [isRentModalOpen, setIsRentModalOpen] = useState(false);
 
-    // Scan for communities on mount
+    // Fetch communities on mount
+    // Fetch communities on mount
     useEffect(() => {
-        const scanCommunities = () => {
-            const keys = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key?.startsWith('snapsell_ads_')) {
-                    const community = key.replace('snapsell_ads_', '');
-                    if (community) keys.push(community);
-                }
-            }
-            if (keys.length > 0) {
-                // Deduplicate and set
-                setCommunities(Array.from(new Set(['default', ...keys])));
-            }
-        };
-
         if (isLoggedIn) {
-            scanCommunities();
+            fetch('/api/ads?action=list_communities')
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data) && data.length > 0) {
+                        setCommunities(Array.from(new Set(['default', ...data])));
+                    }
+                })
+                .catch(console.error);
         }
     }, [isLoggedIn]);
 
@@ -200,8 +193,8 @@ export default function AdminPage() {
                                                 <button
                                                     onClick={() => toggleAdStatus(index, ad)}
                                                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-colors ${ad.isActive
-                                                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                            : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                        : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
                                                         }`}
                                                 >
                                                     {ad.isActive ? <Check size={12} /> : <X size={12} />}

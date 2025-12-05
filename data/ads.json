@@ -1,0 +1,9 @@
+{
+  "test_community": [
+    {
+      "advertiser": "Test Ad",
+      "offer": "Test Offer",
+      "isActive": true
+    }
+  ]
+}
