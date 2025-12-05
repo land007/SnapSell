@@ -288,10 +288,10 @@ export default function RentAdModal({ isOpen, onClose, onPublish }: RentAdModalP
                                 <p className="text-violet-800 font-medium text-sm">请联系群主缴费开通</p>
                                 <div className="flex justify-center">
                                     <div className="bg-white p-2 rounded-lg shadow-sm">
-                                        <QRCodeSVG value="https://u.wechat.com/mock-admin-id" size={120} />
+                                        <QRCodeSVG value="https://u.wechat.com/ECPgsLO5daaYhwhC_uTaDP8?s=2" size={120} />
                                     </div>
                                 </div>
-                                <p className="text-xs text-violet-600">扫码添加群主微信 (ID: Admin888)</p>
+                                <p className="text-xs text-violet-600">扫码添加群主微信 (ID: idle-home)</p>
                             </div>
 
                             <div className="space-y-3">
