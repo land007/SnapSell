@@ -141,23 +141,48 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
         return () => window.removeEventListener('paste', handlePaste);
     }, [formData]); // Add dependency to ensure state updates correctly
 
-    const processFile = (file: File) => {
+    const processFile = async (file: File) => {
         setIsUploading(true);
+
+        // Show preview immediately
         const reader = new FileReader();
         reader.onload = (event) => {
             const dataUrl = event.target?.result as string;
             if (dataUrl) {
-                // Simple compression logic (simplified from original for brevity, or reuse)
-                // For this implementation, let's just use the dataUrl directly to save space/complexity
-                // unless we want to duplicate the compression logic. 
-                // Let's just set it for now.
                 const newData = { ...formData, image: dataUrl };
                 setFormData(newData);
                 onUpdate(newData);
             }
-            setIsUploading(false);
         };
         reader.readAsDataURL(file);
+
+        // Upload to R2 in background
+        try {
+            const uploadFormData = new FormData();
+            uploadFormData.append('file', file);
+
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: uploadFormData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const data = await response.json();
+
+            // Replace preview with actual URL
+            const newData = { ...formData, image: data.url };
+            setFormData(newData);
+            onUpdate(newData);
+            console.log('[ProductForm] Image uploaded to R2:', data.url);
+        } catch (error) {
+            console.error('[ProductForm] Upload error:', error);
+            // Keep the preview on error, user can retry
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

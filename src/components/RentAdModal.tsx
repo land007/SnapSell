@@ -93,14 +93,41 @@ export default function RentAdModal({ isOpen, onClose, onPublish }: RentAdModalP
         }
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setFormData(prev => ({ ...prev, image: e.target?.result as string }));
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        // Show preview immediately
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setFormData(prev => ({ ...prev, image: e.target?.result as string }));
+        };
+        reader.readAsDataURL(file);
+
+        // Upload to R2 in background
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const data = await response.json();
+
+            // Replace preview with actual URL
+            setFormData(prev => ({ ...prev, image: data.url }));
+            console.log('[RentAdModal] Image uploaded to R2:', data.url);
+        } catch (error) {
+            console.error('[RentAdModal] Upload error:', error);
+            alert('图片上传失败，请重试');
+            setFormData(prev => ({ ...prev, image: null }));
         }
     };
 
