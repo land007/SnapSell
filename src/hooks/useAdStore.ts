@@ -38,5 +38,14 @@ export const useAdStore = (communityId: string = 'default') => {
         });
     };
 
-    return { ads, addAd, removeAd };
+    const updateAd = (index: number, updatedAd: AdData) => {
+        setAds(prev => {
+            const newAds = [...prev];
+            newAds[index] = updatedAd;
+            localStorage.setItem(storageKey, JSON.stringify(newAds));
+            return newAds;
+        });
+    };
+
+    return { ads, addAd, removeAd, updateAd };
 };
