@@ -235,16 +235,16 @@ function HomeContent() {
                 </>
               )}
             </button>
-
-            {/* Hidden card for image generation on mobile */}
-            <div className="absolute opacity-0 pointer-events-none -z-10">
-              <ProductCard
-                ref={cardRef}
-                data={productData}
-                communityName={communityName || undefined}
-              />
-            </div>
           </div>
+        </div>
+
+        {/* Hidden card for image generation on mobile - positioned outside main layout */}
+        <div className="lg:hidden fixed top-0 left-[-9999px] opacity-0 pointer-events-none">
+          <ProductCard
+            ref={cardRef}
+            data={productData}
+            communityName={communityName || undefined}
+          />
         </div>
 
       </main>
