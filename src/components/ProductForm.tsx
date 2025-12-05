@@ -13,13 +13,14 @@ export interface ProductData {
 }
 
 interface ProductFormProps {
+    initialData?: ProductData; // Optional initial data from parent
     onUpdate: (data: ProductData) => void;
     loadingAdConfig: any; // Ideally import type, but for now any or define it
     onAdComplete: () => void;
 }
 
-export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }: ProductFormProps) {
-    const [formData, setFormData] = useState({
+export default function ProductForm({ initialData, onUpdate, loadingAdConfig, onAdComplete }: ProductFormProps) {
+    const [formData, setFormData] = useState(initialData || {
         title: '',
         price: '',
         description: '',
