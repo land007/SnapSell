@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getGoogleApiKey } from '@/utils/apiKey';
 
 // Define the response structure
 interface AnalyzeResponse {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const apiKey = process.env.GOOGLE_API_KEY;
+        const apiKey = getGoogleApiKey();
 
         // MOCK MODE: Fallback if no key
         if (!apiKey || apiKey === 'mock') {
