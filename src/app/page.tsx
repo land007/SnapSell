@@ -174,7 +174,7 @@ function HomeContent() {
             />
 
             {/* Mobile-only Generate Button */}
-            <div className="lg:hidden">
+            <div className="lg:hidden space-y-3">
               <button
                 onClick={handleGenerate}
                 disabled={isGenerating}
