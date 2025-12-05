@@ -72,8 +72,8 @@ export async function GET(req: NextRequest) {
             const ads = await kv.get<AdData[]>(`snapsell_ads_${community}`);
             return NextResponse.json(ads || []);
         }
-        // 3. Local Fallback (Dev only)
-        else if (process.env.NODE_ENV === 'development') {
+        // 3. Local Fallback (Dev only, and NOT on Vercel)
+        else if (process.env.NODE_ENV === 'development' && !process.env.VERCEL) {
             const allData = await readLocalData();
             if (action === 'list_communities') {
                 return NextResponse.json(Object.keys(allData));
@@ -116,11 +116,16 @@ export async function POST(req: NextRequest) {
             await kv.set(`snapsell_ads_${community}`, ads);
         }
         // 3. Local Fallback
-        else if (process.env.NODE_ENV === 'development') {
+        else if (process.env.NODE_ENV === 'development' && !process.env.VERCEL) {
             console.log('[API] Using Local File System');
-            const allData = await readLocalData();
-            allData[community] = ads;
-            await writeLocalData(allData);
+            try {
+                const allData = await readLocalData();
+                allData[community] = ads;
+                await writeLocalData(allData);
+            } catch (err) {
+                console.error('[API] Local write failed, falling back to memory:', err);
+                globalMemoryAds[community] = ads;
+            }
         }
         // 4. In-Memory Fallback
         else {
