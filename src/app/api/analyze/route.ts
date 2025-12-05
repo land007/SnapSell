@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getGoogleApiKey } from '@/utils/apiKey';
+import Redis from 'ioredis';
 
 // Define the response structure
 interface AnalyzeResponse {
@@ -12,47 +13,101 @@ interface AnalyzeResponse {
     phone?: string;
 }
 
-// Simple in-memory rate limiter (Note: resets on server restart)
-const RATE_LIMIT_MAP = new Map<string, { tokens: number; lastRefill: number }>();
+// Initialize Redis client
+let redis: Redis | null = null;
+if (process.env.REDIS_URL) {
+    redis = new Redis(process.env.REDIS_URL);
+}
+
+// In-memory fallback if Redis is not available
+const MEMORY_RATE_LIMIT = new Map<string, { tokens: number; lastRefill: number }>();
+
 const MAX_TOKENS = 3;
 const REFILL_INTERVAL = 60 * 60 * 1000; // 1 hour
+
+// Helper function to get rate limit data
+async function getRateLimit(visitorId: string): Promise<{ tokens: number; lastRefill: number }> {
+    if (redis) {
+        const key = `ratelimit:${visitorId}`;
+        const data = await redis.get(key);
+        if (data) {
+            return JSON.parse(data);
+        }
+        // Initialize new user
+        const newLimit = { tokens: MAX_TOKENS, lastRefill: Date.now() };
+        await redis.set(key, JSON.stringify(newLimit), 'EX', 7 * 24 * 60 * 60); // 7 days expiry
+        return newLimit;
+    } else {
+        // Fallback to memory
+        let limit = MEMORY_RATE_LIMIT.get(visitorId);
+        if (!limit) {
+            limit = { tokens: MAX_TOKENS, lastRefill: Date.now() };
+            MEMORY_RATE_LIMIT.set(visitorId, limit);
+        }
+        return limit;
+    }
+}
+
+// Helper function to save rate limit data
+async function saveRateLimit(visitorId: string, data: { tokens: number; lastRefill: number }): Promise<void> {
+    if (redis) {
+        const key = `ratelimit:${visitorId}`;
+        await redis.set(key, JSON.stringify(data), 'EX', 7 * 24 * 60 * 60); // 7 days expiry
+    } else {
+        MEMORY_RATE_LIMIT.set(visitorId, data);
+    }
+}
+
+// Helper function to check and consume token
+async function checkAndConsumeToken(visitorId: string): Promise<{ allowed: boolean; remainingTokens: number; errorMessage?: string }> {
+    const now = Date.now();
+    const userLimit = await getRateLimit(visitorId);
+
+    // Calculate refill
+    const timePassed = now - userLimit.lastRefill;
+    const tokensToAdd = Math.floor(timePassed / REFILL_INTERVAL);
+
+    if (tokensToAdd > 0) {
+        userLimit.tokens = Math.min(MAX_TOKENS, userLimit.tokens + tokensToAdd);
+        userLimit.lastRefill = now;
+    }
+
+    // Check if tokens available
+    if (userLimit.tokens <= 0) {
+        const timeToNextRefill = REFILL_INTERVAL - (now - userLimit.lastRefill);
+        const minutes = Math.ceil(timeToNextRefill / 60000);
+        return {
+            allowed: false,
+            remainingTokens: 0,
+            errorMessage: `今日次数已用完，请休息一下再来 (剩余恢复时间 ${minutes} 分钟)`
+        };
+    }
+
+    // Consume token
+    userLimit.tokens--;
+    await saveRateLimit(visitorId, userLimit);
+
+    return {
+        allowed: true,
+        remainingTokens: userLimit.tokens
+    };
+}
 
 export async function POST(req: NextRequest) {
     try {
         const { image, visitorId } = await req.json();
 
         // 1. Rate Limiting Logic
+        let remainingTokens: number | undefined;
         if (visitorId) {
-            const now = Date.now();
-            let userLimit = RATE_LIMIT_MAP.get(visitorId);
-
-            if (!userLimit) {
-                userLimit = { tokens: MAX_TOKENS, lastRefill: now };
-                RATE_LIMIT_MAP.set(visitorId, userLimit);
-            }
-
-            // Calculate refill
-            const timePassed = now - userLimit.lastRefill;
-            const tokensToAdd = Math.floor(timePassed / REFILL_INTERVAL);
-
-            if (tokensToAdd > 0) {
-                userLimit.tokens = Math.min(MAX_TOKENS, userLimit.tokens + tokensToAdd);
-                userLimit.lastRefill = now;
-                // console.log(`[RateLimit] Refilled ${tokensToAdd} tokens for ${visitorId}. Current: ${userLimit.tokens}`);
-            }
-
-            if (userLimit.tokens <= 0) {
-                const timeToNextRefill = REFILL_INTERVAL - (now - userLimit.lastRefill);
-                const minutes = Math.ceil(timeToNextRefill / 60000);
+            const { allowed, remainingTokens: newRemainingTokens, errorMessage } = await checkAndConsumeToken(visitorId);
+            remainingTokens = newRemainingTokens;
+            if (!allowed) {
                 return NextResponse.json(
-                    { error: `今日次数已用完，请休息一下再来 (剩余恢复时间 ${minutes} 分钟)` },
+                    { error: errorMessage },
                     { status: 429 }
                 );
             }
-
-            // Deduct token
-            userLimit.tokens--;
-            RATE_LIMIT_MAP.set(visitorId, userLimit);
         } else {
             console.warn('[RateLimit] No visitorId provided!');
         }
@@ -77,7 +132,7 @@ export async function POST(req: NextRequest) {
                 tags: ["99新", "电池耐用", "箱说全", "个人自用"],
                 address: "北京市海淀区中关村大街1号",
                 phone: "13800138000",
-                remainingTokens: visitorId ? RATE_LIMIT_MAP.get(visitorId)?.tokens : undefined
+                remainingTokens: remainingTokens
             });
         }
 
@@ -128,7 +183,7 @@ export async function POST(req: NextRequest) {
 
             return NextResponse.json({
                 ...data,
-                remainingTokens: visitorId ? RATE_LIMIT_MAP.get(visitorId)?.tokens : undefined
+                remainingTokens: remainingTokens
             });
 
         } catch (aiError) {
@@ -156,18 +211,22 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ tokens: MAX_TOKENS });
     }
 
-    const now = Date.now();
-    let userLimit = RATE_LIMIT_MAP.get(visitorId);
+    try {
+        const now = Date.now();
+        const userLimit = await getRateLimit(visitorId);
 
-    if (!userLimit) {
+        // Calculate refill
+        const timePassed = now - userLimit.lastRefill;
+        const tokensToAdd = Math.floor(timePassed / REFILL_INTERVAL);
+
+        let currentTokens = userLimit.tokens;
+        if (tokensToAdd > 0) {
+            currentTokens = Math.min(MAX_TOKENS, userLimit.tokens + tokensToAdd);
+        }
+
+        return NextResponse.json({ tokens: currentTokens });
+    } catch (error) {
+        console.error('GET rate limit error:', error);
         return NextResponse.json({ tokens: MAX_TOKENS });
     }
-
-    // Calculate refill (read-only, don't update state on GET to avoid side effects, or update if needed)
-    // For display accuracy, we should calculate what the tokens WOULD be.
-    const timePassed = now - userLimit.lastRefill;
-    const tokensToAdd = Math.floor(timePassed / REFILL_INTERVAL);
-    const currentTokens = Math.min(MAX_TOKENS, userLimit.tokens + tokensToAdd);
-
-    return NextResponse.json({ tokens: currentTokens });
 }
