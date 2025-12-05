@@ -72,20 +72,21 @@ export async function GET(req: NextRequest) {
             const ads = await kv.get<AdData[]>(`snapsell_ads_${community}`);
             return NextResponse.json(ads || []);
         }
-        // 3. Local Fallback (Dev only, and NOT on Vercel)
-        else if (process.env.NODE_ENV === 'development' && !process.env.VERCEL) {
-            const allData = await readLocalData();
-            if (action === 'list_communities') {
-                return NextResponse.json(Object.keys(allData));
-            }
-            return NextResponse.json(allData[community] || []);
-        }
-        // 4. In-Memory Fallback
+        // 3. Local Fallback (Try File System, Fallback to Memory)
         else {
-            if (action === 'list_communities') {
-                return NextResponse.json(Object.keys(globalMemoryAds));
+            try {
+                const allData = await readLocalData();
+                if (action === 'list_communities') {
+                    return NextResponse.json(Object.keys(allData));
+                }
+                return NextResponse.json(allData[community] || []);
+            } catch (err) {
+                // If file read fails, fallback to memory
+                if (action === 'list_communities') {
+                    return NextResponse.json(Object.keys(globalMemoryAds));
+                }
+                return NextResponse.json(globalMemoryAds[community] || []);
             }
-            return NextResponse.json(globalMemoryAds[community] || []);
         }
     } catch (error) {
         console.error('[API] Storage Error:', error);
@@ -115,22 +116,19 @@ export async function POST(req: NextRequest) {
             console.log('[API] Using Vercel KV');
             await kv.set(`snapsell_ads_${community}`, ads);
         }
-        // 3. Local Fallback
-        else if (process.env.NODE_ENV === 'development' && !process.env.VERCEL) {
-            console.log('[API] Using Local File System');
+        // 3. Local Fallback (Try File System, Fallback to Memory)
+        else {
+            console.log('[API] Attempting Local File System');
             try {
                 const allData = await readLocalData();
                 allData[community] = ads;
                 await writeLocalData(allData);
+                console.log('[API] Saved to Local File System');
             } catch (err) {
-                console.error('[API] Local write failed, falling back to memory:', err);
+                console.error('[API] Local write failed (likely EROFS), falling back to memory:', err);
+                console.log('[API] Using In-Memory Fallback');
                 globalMemoryAds[community] = ads;
             }
-        }
-        // 4. In-Memory Fallback
-        else {
-            console.log('[API] Using In-Memory Fallback');
-            globalMemoryAds[community] = ads;
         }
 
         console.log('[API] Save successful');
