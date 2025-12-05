@@ -172,30 +172,6 @@ function HomeContent() {
               loadingAdConfig={NIKE_AD_CONFIG}
               onAdComplete={handleAdComplete}
             />
-
-            {/* Mobile-only Generate Button */}
-            <div className="lg:hidden space-y-3">
-              <button
-                onClick={handleGenerate}
-                disabled={isGenerating}
-                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground py-4 px-6 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25"
-              >
-                {isGenerating ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                    <span>生成中...</span>
-                  </>
-                ) : (
-                  <>
-                    <Download size={20} />
-                    <span>生成好物图片</span>
-                  </>
-                )}
-              </button>
-              <p className="text-center text-xs text-muted-foreground mt-3">
-                💡 提示：生成后长按图片可直接分享到微信
-              </p>
-            </div>
           </div>
 
           {/* Right Column: Preview & Actions (Desktop only) */}
