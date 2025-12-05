@@ -35,7 +35,7 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data, commun
                     <img
                         src={image}
                         alt={title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                         crossOrigin="anonymous"
                         onError={(e) => {
                             console.error('ProductCard image load error');
