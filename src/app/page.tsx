@@ -236,8 +236,8 @@ function HomeContent() {
               )}
             </button>
 
-            {/* Hidden card for image generation */}
-            <div className="hidden">
+            {/* Hidden card for image generation on mobile */}
+            <div className="absolute opacity-0 pointer-events-none -z-10">
               <ProductCard
                 ref={cardRef}
                 data={productData}
