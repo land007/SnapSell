@@ -266,18 +266,21 @@ export default function ProductForm({ initialData, onUpdate, loadingAdConfig, on
                                 </button>
                             </div>
                         ) : (
-                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <label className="flex flex-col items-center justify-center w-full h-56 border-2 border-dashed border-primary/50 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl cursor-pointer hover:border-primary hover:from-primary/10 hover:to-primary/15 transition-all duration-300 shadow-lg hover:shadow-xl">
+                                <div className="flex flex-col items-center justify-center pt-6 pb-6">
                                     {isUploading ? (
                                         <>
-                                            <div className="w-8 h-8 mb-3 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                                            <p className="text-sm text-muted-foreground">正在处理图片...</p>
+                                            <div className="w-12 h-12 mb-4 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                            <p className="text-base font-medium text-foreground">正在处理图片...</p>
                                         </>
                                     ) : (
                                         <>
-                                            <Upload className="w-8 h-8 mb-3 text-muted-foreground" />
-                                            <p className="text-sm text-muted-foreground">点击上传 或 Ctrl+V 粘贴</p>
-                                            <p className="text-xs text-muted-foreground mt-1">支持 JPG、PNG、HEIC 等格式</p>
+                                            <div className="w-16 h-16 mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+                                                <Upload className="w-8 h-8 text-primary" />
+                                            </div>
+                                            <p className="text-lg font-bold text-foreground mb-2">📸 上传好物图片</p>
+                                            <p className="text-sm text-muted-foreground mb-1">点击选择文件 或 按 Ctrl+V 粘贴</p>
+                                            <p className="text-xs text-muted-foreground/70">支持 JPG、PNG、HEIC 等格式</p>
                                         </>
                                     )}
                                 </div>
