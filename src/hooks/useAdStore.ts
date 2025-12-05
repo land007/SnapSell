@@ -26,13 +26,16 @@ export const useAdStore = (communityId: string = 'default') => {
     }, [communityId]);
 
     const saveAds = async (newAds: AdData[]) => {
+        console.log('Saving ads...', newAds.length);
         setAds(newAds); // Optimistic update
         try {
-            await fetch('/api/ads', {
+            console.log('Sending POST request to /api/ads');
+            const res = await fetch('/api/ads', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ community: communityId, ads: newAds }),
             });
+            console.log('Save response:', res.status);
         } catch (error) {
             console.error('Failed to save ads:', error);
             // Revert on error? For now, keep optimistic.
