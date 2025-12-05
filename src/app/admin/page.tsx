@@ -57,17 +57,17 @@ export default function AdminPage() {
 
     if (!isLoggedIn) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-                    <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">SnapSell 管理后台</h1>
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="bg-card p-8 rounded-2xl shadow-xl w-full max-w-md border border-border">
+                    <h1 className="text-2xl font-bold text-center mb-6 text-foreground">SnapSell 管理后台</h1>
                     <form onSubmit={handleLogin} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">管理员密码</label>
+                            <label className="block text-sm font-medium text-foreground mb-1">管理员密码</label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
+                                className="w-full px-4 py-2 border border-input bg-background text-foreground rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
                                 placeholder="请输入密码"
                             />
                         </div>
@@ -84,18 +84,18 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+            <header className="bg-card border-b border-border px-6 py-4 flex items-center justify-between sticky top-0 z-10">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center text-white font-bold">
                         A
                     </div>
-                    <h1 className="font-bold text-xl text-gray-800">SnapSell Admin</h1>
+                    <h1 className="font-bold text-xl text-foreground">SnapSell Admin</h1>
                 </div>
                 <button
                     onClick={() => setIsLoggedIn(false)}
-                    className="flex items-center gap-2 text-gray-500 hover:text-red-600 transition-colors"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-red-600 transition-colors"
                 >
                     <LogOut size={18} />
                     <span>退出</span>
@@ -106,13 +106,13 @@ export default function AdminPage() {
                 {/* Controls */}
                 <div className="flex flex-col md:flex-row gap-6 mb-8">
                     {/* Community Selector */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex-1">
-                        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">当前管理小区</h2>
+                    <div className="bg-card p-4 rounded-xl shadow-sm border border-border flex-1">
+                        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">当前管理小区</h2>
                         <div className="flex gap-2">
                             <select
                                 value={selectedCommunity}
                                 onChange={(e) => setSelectedCommunity(e.target.value)}
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
+                                className="flex-1 px-3 py-2 border border-input bg-background text-foreground rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
                             >
                                 {communities.map(c => (
                                     <option key={c} value={c}>{c === 'default' ? '默认小区 (default)' : c}</option>
@@ -129,7 +129,7 @@ export default function AdminPage() {
                                 value={newCommunityName}
                                 onChange={(e) => setNewCommunityName(e.target.value)}
                                 placeholder="输入小区名称"
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
+                                className="flex-1 px-3 py-2 border border-input bg-background text-foreground rounded-lg focus:ring-2 focus:ring-violet-500 outline-none"
                             />
                             <button
                                 onClick={handleAddCommunity}
@@ -143,9 +143,9 @@ export default function AdminPage() {
                 </div>
 
                 {/* Ad List */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                        <h2 className="text-xl font-bold text-gray-800">广告列表 ({ads.length})</h2>
+                <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+                    <div className="p-6 border-b border-border flex justify-between items-center">
+                        <h2 className="text-xl font-bold text-foreground">广告列表 ({ads.length})</h2>
                         <button
                             onClick={() => setIsRentModalOpen(true)}
                             className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors font-medium"
@@ -157,7 +157,7 @@ export default function AdminPage() {
 
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-gray-50 text-gray-500 text-sm">
+                            <thead className="bg-muted text-muted-foreground text-sm">
                                 <tr>
                                     <th className="px-6 py-4 font-medium">广告图</th>
                                     <th className="px-6 py-4 font-medium">广告主 & 文案</th>
@@ -166,28 +166,28 @@ export default function AdminPage() {
                                     <th className="px-6 py-4 font-medium text-right">操作</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-border">
                                 {ads.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
+                                        <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
                                             暂无广告数据
                                         </td>
                                     </tr>
                                 ) : (
                                     ads.map((ad, index) => (
-                                        <tr key={index} className="hover:bg-gray-50/50 transition-colors">
+                                        <tr key={index} className="hover:bg-muted/50 transition-colors">
                                             <td className="px-6 py-4">
-                                                <div className="w-20 h-12 bg-gray-100 rounded-lg overflow-hidden relative">
+                                                <div className="w-20 h-12 bg-muted rounded-lg overflow-hidden relative">
                                                     {ad.image ? (
                                                         <img src={ad.image} alt={ad.advertiser} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No Img</div>
+                                                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No Img</div>
                                                     )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="font-bold text-gray-900">{ad.advertiser}</div>
-                                                <div className="text-sm text-gray-500 line-clamp-1">{ad.offer}</div>
+                                                <div className="font-bold text-foreground">{ad.advertiser}</div>
+                                                <div className="text-sm text-muted-foreground line-clamp-1">{ad.offer}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <button

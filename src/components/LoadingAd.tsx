@@ -45,7 +45,7 @@ export default function LoadingAd({
     // Minimized State
     if (isMinimized) {
         return (
-            <div className="fixed bottom-6 right-6 z-[50] w-72 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-500">
+            <div className="fixed bottom-6 right-6 z-[50] w-72 bg-card rounded-xl shadow-2xl border border-border overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-500">
                 <div className="relative h-40 group cursor-pointer">
                     <a href={link} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
                         {type === 'video' ? (
@@ -106,7 +106,7 @@ export default function LoadingAd({
     // Expanded State (Modal)
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-            <div className="w-full max-w-md bg-white rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 relative">
+            <div className="w-full max-w-md bg-card rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 relative border border-border">
 
                 {/* Header: Progress & Status */}
                 <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white/50 backdrop-blur-sm absolute top-0 left-0 right-0 z-10">

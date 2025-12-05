@@ -69,7 +69,7 @@ export default function AdSlot({ data, onOpenChange }: AdSlotProps) {
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
                     <div
-                        className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
+                        className="bg-card rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] border border-border"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Close Button */}
@@ -119,7 +119,7 @@ export default function AdSlot({ data, onOpenChange }: AdSlotProps) {
                                                 <div className="flex items-start gap-2.5">
                                                     <span className="text-lg shrink-0">📍</span>
                                                     <div>
-                                                        <p className="text-gray-900 font-medium leading-tight">{data.address}</p>
+                                                        <p className="text-foreground font-medium leading-tight">{data.address}</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -159,7 +159,7 @@ export default function AdSlot({ data, onOpenChange }: AdSlotProps) {
                                         ) : (
                                             <div className="bg-white border-2 border-dashed border-indigo-200 rounded-xl p-4 text-center animate-in zoom-in-95 duration-300">
                                                 <p className="text-xs text-gray-500 mb-3">请向店员出示此二维码</p>
-                                                <div className="bg-white p-2 inline-block rounded-xl shadow-sm border border-gray-100">
+                                                <div className="bg-card p-2 inline-block rounded-xl shadow-sm border border-border">
                                                     <QRCodeSVG value={data.qrContent} size={160} />
                                                 </div>
                                                 <p className="text-[10px] text-gray-400 mt-3">

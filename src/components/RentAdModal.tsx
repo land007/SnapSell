@@ -175,10 +175,10 @@ export default function RentAdModal({ isOpen, onClose, onPublish }: RentAdModalP
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl w-full max-w-md relative shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="bg-card rounded-2xl w-full max-w-md relative shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden border border-border">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
+                    className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors z-10"
                 >
                     <X size={24} />
                 </button>
@@ -349,7 +349,7 @@ export default function RentAdModal({ isOpen, onClose, onPublish }: RentAdModalP
                             <div className="bg-violet-50 p-4 rounded-xl border border-violet-100 space-y-3">
                                 <p className="text-violet-800 font-medium text-sm">请联系群主缴费开通</p>
                                 <div className="flex justify-center">
-                                    <div className="bg-white p-2 rounded-lg shadow-sm">
+                                    <div className="bg-card p-2 rounded-lg shadow-sm border border-border">
                                         <QRCodeSVG value="https://u.wechat.com/ECPgsLO5daaYhwhC_uTaDP8?s=2" size={120} />
                                     </div>
                                 </div>
