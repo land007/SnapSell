@@ -224,7 +224,7 @@ export default function ProductForm({ initialData, onUpdate, loadingAdConfig, on
                 {/* Image Upload */}
                 <div className="space-y-2">
                     <label className="block text-sm font-medium text-muted-foreground">
-                        商品图片 <span className="text-xs text-muted-foreground/70">(支持 Ctrl+V 粘贴)</span>
+                        好物图片 <span className="text-xs text-muted-foreground/70">(支持 Ctrl+V 粘贴)</span>
                     </label>
                     <div className="relative">
                         {formData.image ? (
