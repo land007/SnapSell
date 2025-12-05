@@ -186,7 +186,11 @@ function HomeContent() {
               {/* Preview Container - Centered */}
               <div className="flex justify-center bg-secondary/30 p-4 rounded-2xl border border-border/50">
                 <div className="shadow-2xl rounded-none overflow-hidden transform transition-transform hover:scale-[1.02] duration-300">
-                  <ProductCard ref={cardRef} data={productData} />
+                  <ProductCard
+                    ref={cardRef}
+                    data={productData}
+                    communityName={communityName || undefined}
+                  />
                 </div>
               </div>
 

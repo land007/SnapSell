@@ -9,9 +9,10 @@ interface ProductCardProps {
         description: string;
         image: string | null;
     };
+    communityName?: string;
 }
 
-const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data }, ref) => {
+const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data, communityName }, ref) => {
     const { title, price, description, image } = data;
 
     return (
@@ -22,8 +23,10 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data }, ref)
         >
             {/* Header / Branding */}
             <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-4 text-white flex justify-between items-center">
-                <div className="font-bold text-lg tracking-tight">闲置之家</div>
-                <div className="text-xs opacity-80">邻里好物 放心交易</div>
+                <div className="font-bold text-lg tracking-tight">
+                    {communityName ? `SnapSell · ${communityName}` : 'SnapSell · 闲置之家'}
+                </div>
+                <div className="text-xs opacity-80">邻里好物 当面交易</div>
             </div>
 
             {/* Main Image Area */}
@@ -61,26 +64,12 @@ const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ data }, ref)
                     {title || "商品名称"}
                 </h1>
 
-                <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4 flex-1">
+                <p className="text-muted-foreground text-sm leading-relaxed line-clamp-[8] flex-1">
                     {description || "这里显示商品描述..."}
                 </p>
-
-                {/* Footer / QR Placeholder */}
-                <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                            头像
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                            <p>卖家发布</p>
-                            <p>扫码联系我</p>
-                        </div>
-                    </div>
-                    {/* Placeholder for user QR or mini-program code */}
-                    <div className="w-12 h-12 bg-muted rounded-lg"></div>
-                </div>
             </div>
         </div>
+
     );
 });
 
