@@ -9,10 +9,11 @@ import { AD_CONFIG } from '@/config/adConfig';
 
 interface AdCarouselProps {
     initialAd?: AdData; // Optional initial ad (e.g., from AI result)
+    communityName?: string;
 }
 
-export default function AdCarousel({ initialAd }: AdCarouselProps) {
-    const { ads, addAd } = useAdStore();
+export default function AdCarousel({ initialAd, communityName = 'default' }: AdCarouselProps) {
+    const { ads, addAd } = useAdStore(communityName);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isRentModalOpen, setIsRentModalOpen] = useState(false);
     const [isAdModalOpen, setIsAdModalOpen] = useState(false);

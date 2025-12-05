@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { toPng } from 'html-to-image';
 import { Download } from 'lucide-react';
 import ProductForm, { ProductData } from '@/components/ProductForm';
@@ -34,7 +35,10 @@ const NIKE_AD_HEADER: AdData = {
   contact: ''
 };
 
-export default function Home() {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const communityName = searchParams.get('name');
+
   const [productData, setProductData] = useState<ProductData>({
     title: '',
     price: '',
@@ -139,7 +143,9 @@ export default function Home() {
             <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
               S
             </div>
-            <h1 className="font-bold text-xl tracking-tight">SnapSell</h1>
+            <h1 className="font-bold text-xl tracking-tight">
+              SnapSell {communityName && <span className="text-violet-600">· {communityName}</span>}
+            </h1>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground hidden sm:block">
@@ -156,7 +162,10 @@ export default function Home() {
 
           {/* Left Column: Form & Ad (Desktop: 7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            <AdCarousel initialAd={headerAd.isActive ? headerAd : undefined} />
+            <AdCarousel
+              initialAd={headerAd.isActive ? headerAd : undefined}
+              communityName={communityName || undefined}
+            />
             <ProductForm
               onUpdate={handleUpdate}
               loadingAdConfig={NIKE_AD_CONFIG}
@@ -283,5 +292,13 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
