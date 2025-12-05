@@ -172,10 +172,34 @@ function HomeContent() {
               loadingAdConfig={NIKE_AD_CONFIG}
               onAdComplete={handleAdComplete}
             />
+
+            {/* Mobile-only Generate Button */}
+            <div className="lg:hidden">
+              <button
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground py-4 px-6 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                    <span>生成中...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download size={20} />
+                    <span>生成好物图片</span>
+                  </>
+                )}
+              </button>
+              <p className="text-center text-xs text-muted-foreground mt-3">
+                💡 提示：生成后长按图片可直接分享到微信
+              </p>
+            </div>
           </div>
 
-          {/* Right Column: Preview & Actions (Desktop: 5 cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
+          {/* Right Column: Preview & Actions (Desktop only) */}
+          <div className="hidden lg:block lg:col-span-5">
             <div className="sticky top-24 space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">实时预览</h2>
@@ -183,40 +207,67 @@ function HomeContent() {
                   375 x 500 px
                 </span>
               </div>
-            </div>
 
-            {/* Preview Container - Centered */}
-            <div className="flex justify-center bg-secondary/30 p-4 rounded-2xl border border-border/50">
-              <div className="shadow-2xl rounded-none overflow-hidden transform transition-transform hover:scale-[1.02] duration-300">
-                <ProductCard
-                  ref={cardRef}
-                  data={productData}
-                  communityName={communityName || undefined}
-                />
+              {/* Preview Container - Centered */}
+              <div className="flex justify-center bg-secondary/30 p-4 rounded-2xl border border-border/50">
+                <div className="shadow-2xl rounded-none overflow-hidden transform transition-transform hover:scale-[1.02] duration-300">
+                  <ProductCard
+                    ref={cardRef}
+                    data={productData}
+                    communityName={communityName || undefined}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                onClick={handleGenerate}
-                disabled={isGenerating}
-                className="col-span-2 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground py-3 px-6 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25"
-              >
-                {isGenerating ? (
-                  <span>生成中...</span>
-                ) : (
-                  <>
-                    <Download size={20} />
-                    <span>生成分享图片</span>
-                  </>
-                )}
-              </button>
-            </div>
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={handleGenerate}
+                  disabled={isGenerating}
+                  className="col-span-2 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground py-3 px-6 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25"
+                >
+                  {isGenerating ? (
+                    <span>生成中...</span>
+                  ) : (
+                    <>
+                      <Download size={20} />
+                      <span>生成好物图片</span>
+                    </>
+                  )}
+                </button>
+              </div>
 
-            <p className="text-center text-xs text-muted-foreground">
-              💡 提示：生成后长按图片可直接分享到微信
-            </p>
+              <p className="text-center text-xs text-muted-foreground">
+                💡 提示：生成后长按图片可直接分享到微信
+              </p>
+            </div>
+          </div>
+
+          {/* Mobile: Generate Button */}
+          <div className="lg:hidden space-y-4">
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground py-4 px-6 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25"
+            >
+              {isGenerating ? (
+                <span>生成中...</span>
+              ) : (
+                <>
+                  <Download size={20} />
+                  <span>生成好物图片</span>
+                </>
+              )}
+            </button>
+
+            {/* Hidden card for image generation */}
+            <div className="hidden">
+              <ProductCard
+                ref={cardRef}
+                data={productData}
+                communityName={communityName || undefined}
+              />
+            </div>
           </div>
         </div>
 
