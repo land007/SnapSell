@@ -279,7 +279,9 @@ export default function ProductForm({ initialData, onUpdate, loadingAdConfig, on
                                                 <Upload className="w-8 h-8 text-primary" />
                                             </div>
                                             <p className="text-lg font-bold text-foreground mb-2">📸 上传好物图片</p>
-                                            <p className="text-sm text-muted-foreground mb-1">点击选择文件 或 按 Ctrl+V 粘贴</p>
+                                            <p className="text-sm text-muted-foreground mb-1">
+                                                点击选择文件<span className="hidden md:inline"> 或 按 Ctrl+V 粘贴</span>
+                                            </p>
                                             <p className="text-xs text-muted-foreground/70">支持 JPG、PNG、HEIC 等格式</p>
                                         </>
                                     )}
