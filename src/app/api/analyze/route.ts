@@ -100,9 +100,9 @@ export async function POST(req: NextRequest) {
         
         Output format (JSON only):
         {
-          "title": "A concise, attractive title (in Chinese, e.g. '99新 iPhone 14 Pro', max 20 characters)",
+          "title": "A concise, attractive title (in Chinese, e.g. '99新 iPhone 14 Pro', max 60 characters)",
           "price": "A estimated price number in CNY (just the number, e.g. '4500')",
-          "description": "A friendly, concise description (in Chinese, max 80 characters) mentioning condition and key features.",
+          "description": "A friendly, detailed description (in Chinese, max 240 characters) mentioning condition, color, and key features.",
           "tags": ["tag1", "tag2", "tag3", "tag4"],
           "address": "Extract address from image if visible, otherwise null",
           "phone": "Extract phone number from image if visible, otherwise null"

@@ -9,6 +9,13 @@
   "阳光丽景": [
     {
       "isActive": true,
+      "advertiser": "耐克官方旗舰店",
+      "offer": "极致舒适，动感十足。限时特惠，点击查看详情。",
+      "qrContent": "https://example.com",
+      "contact": ""
+    },
+    {
+      "isActive": true,
       "advertiser": "老张烧烤",
       "offer": "正宗东北烧烤",
       "qrContent": "https://example.com",
