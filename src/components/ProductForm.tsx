@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import { Upload, X } from 'lucide-react';
 import LoadingAd from './LoadingAd';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 export interface ProductData {
     title: string;
@@ -29,6 +30,26 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [smartText, setSmartText] = useState('');
     const [showLoadingAd, setShowLoadingAd] = useState(false);
+    const [visitorId, setVisitorId] = useState<string>('');
+    const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
+
+    useEffect(() => {
+        const loadFingerprint = async () => {
+            const fp = await FingerprintJS.load();
+            const result = await fp.get();
+            setVisitorId(result.visitorId);
+        };
+        loadFingerprint();
+    }, []);
+
+    useEffect(() => {
+        if (visitorId) {
+            fetch(`/api/analyze?visitorId=${visitorId}`)
+                .then(res => res.json())
+                .then(data => setRemainingTokens(data.tokens))
+                .catch(console.error);
+        }
+    }, [visitorId]);
 
     // AI Analysis Handler
     const handleAIAnalyze = async () => {
@@ -39,12 +60,26 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: formData.image }),
+                body: JSON.stringify({
+                    image: formData.image,
+                    visitorId
+                }),
             });
 
-            if (!response.ok) throw new Error('Analysis failed');
-
             const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 429) {
+                    alert(data.error || '次数已用完');
+                    setRemainingTokens(0);
+                    return;
+                }
+                throw new Error(data.error || 'Analysis failed');
+            }
+
+            if (data.remainingTokens !== undefined) {
+                setRemainingTokens(data.remainingTokens);
+            }
 
             const newData = {
                 ...formData,
@@ -207,8 +242,8 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
                                 {/* AI Auto-Fill Button */}
                                 <button
                                     onClick={handleAnalyzeWithAd}
-                                    disabled={isAnalyzing}
-                                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-lg font-medium shadow-md hover:opacity-90 transition-all disabled:opacity-70"
+                                    disabled={isAnalyzing || (remainingTokens !== null && remainingTokens <= 0)}
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-lg font-medium shadow-md hover:opacity-90 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isAnalyzing ? (
                                         <>
@@ -217,7 +252,7 @@ export default function ProductForm({ onUpdate, loadingAdConfig, onAdComplete }:
                                         </>
                                     ) : (
                                         <>
-                                            <span>✨ AI 自动填写信息</span>
+                                            <span>✨ AI 自动填写信息 {remainingTokens !== null ? `(${remainingTokens})` : ''}</span>
                                         </>
                                     )}
                                 </button>

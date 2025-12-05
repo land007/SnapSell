@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Upload, Check } from 'lucide-react';
 import { AdData } from './AdSlot';
 import { AD_CONFIG } from '@/config/adConfig';
 import { QRCodeSVG } from 'qrcode.react';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 interface RentAdModalProps {
     isOpen: boolean;
@@ -25,6 +26,26 @@ export default function RentAdModal({ isOpen, onClose, onPublish }: RentAdModalP
     });
     const [isProcessing, setIsProcessing] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [visitorId, setVisitorId] = useState<string>('');
+    const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
+
+    useEffect(() => {
+        const loadFingerprint = async () => {
+            const fp = await FingerprintJS.load();
+            const result = await fp.get();
+            setVisitorId(result.visitorId);
+        };
+        loadFingerprint();
+    }, []);
+
+    useEffect(() => {
+        if (visitorId) {
+            fetch(`/api/analyze?visitorId=${visitorId}`)
+                .then(res => res.json())
+                .then(data => setRemainingTokens(data.tokens))
+                .catch(console.error);
+        }
+    }, [visitorId]);
 
     if (!isOpen) return null;
 
@@ -36,12 +57,26 @@ export default function RentAdModal({ isOpen, onClose, onPublish }: RentAdModalP
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: formData.image }),
+                body: JSON.stringify({
+                    image: formData.image,
+                    visitorId
+                }),
             });
 
-            if (!response.ok) throw new Error('Analysis failed');
-
             const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 429) {
+                    alert(data.error || '次数已用完');
+                    setRemainingTokens(0);
+                    return;
+                }
+                throw new Error(data.error || 'Analysis failed');
+            }
+
+            if (data.remainingTokens !== undefined) {
+                setRemainingTokens(data.remainingTokens);
+            }
 
             setFormData(prev => ({
                 ...prev,
@@ -158,8 +193,8 @@ export default function RentAdModal({ isOpen, onClose, onPublish }: RentAdModalP
                                             <div className="absolute bottom-2 right-2">
                                                 <button
                                                     onClick={handleAIAnalyze}
-                                                    disabled={isAnalyzing}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 text-white text-xs font-bold rounded-lg shadow-lg hover:bg-violet-700 disabled:opacity-70 transition-all"
+                                                    disabled={isAnalyzing || (remainingTokens !== null && remainingTokens <= 0)}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 text-white text-xs font-bold rounded-lg shadow-lg hover:bg-violet-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
                                                 >
                                                     {isAnalyzing ? (
                                                         <>
@@ -168,7 +203,7 @@ export default function RentAdModal({ isOpen, onClose, onPublish }: RentAdModalP
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <span>✨ AI 自动填写</span>
+                                                            <span>✨ AI 自动填写 {remainingTokens !== null ? `(${remainingTokens})` : ''}</span>
                                                         </>
                                                     )}
                                                 </button>

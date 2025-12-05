@@ -12,9 +12,50 @@ interface AnalyzeResponse {
     phone?: string;
 }
 
+// Simple in-memory rate limiter (Note: resets on server restart)
+const RATE_LIMIT_MAP = new Map<string, { tokens: number; lastRefill: number }>();
+const MAX_TOKENS = 3;
+const REFILL_INTERVAL = 60 * 60 * 1000; // 1 hour
+
 export async function POST(req: NextRequest) {
     try {
-        const { image } = await req.json();
+        const { image, visitorId } = await req.json();
+
+        // 1. Rate Limiting Logic
+        if (visitorId) {
+            const now = Date.now();
+            let userLimit = RATE_LIMIT_MAP.get(visitorId);
+
+            if (!userLimit) {
+                userLimit = { tokens: MAX_TOKENS, lastRefill: now };
+                RATE_LIMIT_MAP.set(visitorId, userLimit);
+            }
+
+            // Calculate refill
+            const timePassed = now - userLimit.lastRefill;
+            const tokensToAdd = Math.floor(timePassed / REFILL_INTERVAL);
+
+            if (tokensToAdd > 0) {
+                userLimit.tokens = Math.min(MAX_TOKENS, userLimit.tokens + tokensToAdd);
+                userLimit.lastRefill = now;
+                // console.log(`[RateLimit] Refilled ${tokensToAdd} tokens for ${visitorId}. Current: ${userLimit.tokens}`);
+            }
+
+            if (userLimit.tokens <= 0) {
+                const timeToNextRefill = REFILL_INTERVAL - (now - userLimit.lastRefill);
+                const minutes = Math.ceil(timeToNextRefill / 60000);
+                return NextResponse.json(
+                    { error: `今日次数已用完，请休息一下再来 (剩余恢复时间 ${minutes} 分钟)` },
+                    { status: 429 }
+                );
+            }
+
+            // Deduct token
+            userLimit.tokens--;
+            RATE_LIMIT_MAP.set(visitorId, userLimit);
+        } else {
+            console.warn('[RateLimit] No visitorId provided!');
+        }
 
         if (!image) {
             return NextResponse.json(
@@ -35,7 +76,8 @@ export async function POST(req: NextRequest) {
                 description: "自用一手，国行正品。电池健康 95%，一直贴膜带壳使用，无划痕无磕碰。原盒配件齐全，因换新机闲置转让。优先面交，爽快包邮。",
                 tags: ["99新", "电池耐用", "箱说全", "个人自用"],
                 address: "北京市海淀区中关村大街1号",
-                phone: "13800138000"
+                phone: "13800138000",
+                remainingTokens: visitorId ? RATE_LIMIT_MAP.get(visitorId)?.tokens : undefined
             });
         }
 
@@ -84,7 +126,10 @@ export async function POST(req: NextRequest) {
             const jsonStr = text.replace(/```json\n?|\n?```/g, '').trim();
             const data = JSON.parse(jsonStr);
 
-            return NextResponse.json(data);
+            return NextResponse.json({
+                ...data,
+                remainingTokens: visitorId ? RATE_LIMIT_MAP.get(visitorId)?.tokens : undefined
+            });
 
         } catch (aiError) {
             console.error('Gemini API Error:', aiError);
@@ -101,4 +146,28 @@ export async function POST(req: NextRequest) {
             { status: 500 }
         );
     }
+}
+
+export async function GET(req: NextRequest) {
+    const { searchParams } = new URL(req.url);
+    const visitorId = searchParams.get('visitorId');
+
+    if (!visitorId) {
+        return NextResponse.json({ tokens: MAX_TOKENS });
+    }
+
+    const now = Date.now();
+    let userLimit = RATE_LIMIT_MAP.get(visitorId);
+
+    if (!userLimit) {
+        return NextResponse.json({ tokens: MAX_TOKENS });
+    }
+
+    // Calculate refill (read-only, don't update state on GET to avoid side effects, or update if needed)
+    // For display accuracy, we should calculate what the tokens WOULD be.
+    const timePassed = now - userLimit.lastRefill;
+    const tokensToAdd = Math.floor(timePassed / REFILL_INTERVAL);
+    const currentTokens = Math.min(MAX_TOKENS, userLimit.tokens + tokensToAdd);
+
+    return NextResponse.json({ tokens: currentTokens });
 }
